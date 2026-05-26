@@ -56,7 +56,7 @@ def print_first_line(ip_or_URL, arg_dict):
         try:
             URL = ip_or_URL
             ip_addr = socket.gethostbyname(ip_or_URL)
-            print("PING " + str(URL) + " " + "(" + str(ip_addr) + ")", end="")
+            print("PING " + str(URL) + " " + "(" + str(ip_addr) + ") ", end="")
         except socket.error as e:
             print(e)
     else: #raw IPv4 address
@@ -318,7 +318,7 @@ def main():
     #maximum data size you can do is 68 bytes
     #i.e. you can only do up to "-s 68" otherwise it stops working
     argument_dictionary = parse_args()
-    if ("-h" in argument_dictionary) or ("--help" in argument_dictionary):
+    if ("-h" in argument_dictionary["ping"]) or ("--help" in argument_dictionary["ping"]):
         print_help_message()
     else:
         if "-t" in argument_dictionary:
