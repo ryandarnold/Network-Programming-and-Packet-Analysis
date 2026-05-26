@@ -6,10 +6,10 @@ Implementation of Linux networking utilities "route" and "ifconfig" in Python
 
 Example output: 
 
-Kernel IP routing table
-Destination       Gateway           Genmask           Flags    Metric   Ref      Use     Iface
-default           172.17.0.1        0.0.0.0           UG       0        0        0       eth0    
-172.17.0.0        0.0.0.0           255.255.0.0       U        0        0        0       eth0 
+	Kernel IP routing table
+	Destination       Gateway           Genmask           Flags    Metric   Ref      Use     Iface
+	default           172.17.0.1        0.0.0.0           UG       0        0        0       eth0    
+	172.17.0.0        0.0.0.0           255.255.0.0       U        0        0        0       eth0 
 
 
 ## Reimplementation of the 'ifconfig' command using the "psutil" and "netifaces" libraries
