@@ -4,7 +4,7 @@
 
 A Linux-style `ping` python program using raw ICMP sockets. I manually construct ICMP Echo Request packets, compute checksums, and measure network round-trip time (RTT).
 
-## Features
+### Features
 
 - ICMP Echo Request/Reply using raw sockets
 - Custom checksum generation
@@ -15,13 +15,13 @@ A Linux-style `ping` python program using raw ICMP sockets. I manually construct
 - RTT statistics (`min/avg/max/mdev`)
 - Packet loss reporting
 
-## Requirements
+### Requirements
 
 - Python3
 - Linux 
 - Root privileges (`sudo`)
 
-## Usage
+### Usage
 
 ```bash
 sudo python3 ping.py <IPv4 destination> [options]
@@ -37,7 +37,7 @@ sudo python3 ping.py <IPv4 destination> [options]
 | `-t` | Timeout before termination (seconds) |
 | `-h` or `--help` | Show help menu |
 
-## Example
+### Example
 
 Ping Google 3 times:
 
@@ -45,7 +45,7 @@ Ping Google 3 times:
 sudo python3 ping.py www.google.com -c 3
 ```
 
-## Example Output
+### Example Output
 
 ```text
 PING www.google.com (142.251.156.119) 56(64) bytes of data
@@ -60,6 +60,6 @@ Process finished with exit code 0
 ```
 
 
-# Traceroute
+## Traceroute
 
 hi
