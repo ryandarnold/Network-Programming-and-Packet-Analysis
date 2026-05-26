@@ -304,8 +304,6 @@ def find_and_print_ICMP_statistics(dest_ip, total_sent, total_received, overall_
 def print_help_message():
     print("usage: [nameOfThisFile].py [-h] [-s S] [-c C] [-i I] [-t T] destination")
     print()
-    print("positional arguments: ")
-    print("  destination target host address")
     print()
     print("options: " )
     print("-h, --help   show this help message and exit")
