@@ -172,6 +172,7 @@ def start_traceroute(arg_dict):
                     if x == 0:
                         print(str(incoming_IP) + " ", end="")
             except socket.timeout:
+                # not sure what to do if the first ping reply works but one of the next two doesn't work
                 difference = probe_count - (x) #tries to find # of probes not answered for each hop but isn't correct
                 list_for_summary.append(difference)
                 print("* * *", end="") #cuts off rest of probes to this IP address
