@@ -16,8 +16,8 @@ default           172.17.0.1        0.0.0.0           UG       0        0       
 
 Example output: 
 
-enp0s3: flags=4163<UP,BROADCAST,RUNNING,MULTICAST> mtu 1500
 
+	enp0s3: flags=4163<UP,BROADCAST,RUNNING,MULTICAST> mtu 1500
 	inet 10.0.2.15 netmask 255.255.255.0 broadcast 10.0.2.255
 	inet6 fd17:625c:f037:2:a00:27ff:fe18:8024 prefixlen 64 scopeid 0x20<link>
 	ether 08:00:27:18:80:24 
