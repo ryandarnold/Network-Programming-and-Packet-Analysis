@@ -1,4 +1,6 @@
-# Custom Ping Utility
+# Custom Ping and Traceroute Utility
+
+## Ping
 
 A Linux-style `ping` python program using raw ICMP sockets. I manually construct ICMP Echo Request packets, compute checksums, and measure network round-trip time (RTT).
 
@@ -56,3 +58,8 @@ rtt min/avg/max/mdev = 180.903/245.315/280.362/55.855
 
 Process finished with exit code 0
 ```
+
+
+# Traceroute
+
+hi
