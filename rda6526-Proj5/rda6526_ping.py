@@ -74,7 +74,7 @@ def print_first_line(ip_or_URL, arg_dict):
         print(str(size_of_data) + "(" + str(size_of_data_plus_header) + ") bytes of data." )
     else: #standard ICMP packet size is 56 bytes of data and 64 bytes in total
         print("56(64) bytes of data")
-    return ip_addr, hostname
+    return ip_addr
 
 def echo_request(dest_IP, data_to_send, ICMP_sequence_num):
     # create the raw ICMP socket
@@ -187,7 +187,7 @@ def start_ping(arg_dict, timeout_occurs, timeout_sec):
     else:
         wait_time = 1 #1 second is default
 
-    dest_ip, hostname = print_first_line(arg_dict["ping"], arg_dict)
+    dest_ip = print_first_line(arg_dict["ping"], arg_dict)
     ICMP_data = create_data(arg_dict)
     if "-c" in arg_dict:
         count = int(arg_dict["-c"])
