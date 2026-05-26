@@ -26,12 +26,12 @@ Example output:
 		TX packets 5121 bytes 378964 0 
 		TX errors 0 dropped 0
 
-lo: flags=73<UP,LOOPBACK,RUNNING> mtu 65536
-	inet 127.0.0.1 netmask 255.0.0.0
-	inet6 ::1 prefixlen 128 scopeid 0x10<host>
-	loop 
-	RX packets 489 bytes 42064 
-	RX errors 0 dropped 0 
-	TX packets 489 bytes 42064 0 
-	TX errors 0 dropped 0
+	lo: flags=73<UP,LOOPBACK,RUNNING> mtu 65536
+		inet 127.0.0.1 netmask 255.0.0.0
+		inet6 ::1 prefixlen 128 scopeid 0x10<host>
+		loop 
+		RX packets 489 bytes 42064 
+		RX errors 0 dropped 0 
+		TX packets 489 bytes 42064 0 
+		TX errors 0 dropped 0
 
