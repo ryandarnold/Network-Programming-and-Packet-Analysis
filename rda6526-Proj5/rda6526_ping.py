@@ -45,7 +45,7 @@ def calc_chksum(data_to_convert):
     upper_and_lower = upper_and_lower + (upper_and_lower >> 16)
     ones_complement_16_bits = ~upper_and_lower & 0xffff
 
-    #wireshark says the upper and lower bits are in the wrong endianess so we need to flip it
+    # Convert checksum to network byte order (big endian)
     byte_1 = (ones_complement_16_bits >> 8) & 0x00FF
     byte_2 = (ones_complement_16_bits << 8) & 0xFF00
     reversed_checksum = byte_1 | byte_2
@@ -90,8 +90,6 @@ def echo_request(dest_IP, data_to_send, ICMP_sequence_num):
     #ICMP_sequence = 2  # allows sender to match incoming echo replies with previously sent echo requests (i.e 2 bytes)
     #above is 'rest of header'
 
-    #data_to_send = b'I LOVE PING!' #keep the size 12 and don't change it (i.e. 12 bytes)
-    #data_to_send = b'I LOVE PING'
 
     # ! for big endian, first 'B' because "ICMP_type" is 8 bits (and 'B' means 8 bits)
     # ICMP_code is 8 bits, so we use a second 'B'. 'H' is unsigned short (16 bits)
@@ -304,7 +302,7 @@ def find_and_print_ICMP_statistics(dest_ip, total_sent, total_received, overall_
     print(str(rtt_min) + "/" + str(rtt_avg) + "/" + str(rtt_max) + "/" + str(mdev) )
 
 def print_help_message():
-    print("usage: rda6526_ping.py [-h] [-s S] [-c C] [-i I] [-t T] destination")
+    print("usage: [nameOfThisFile].py [-h] [-s S] [-c C] [-i I] [-t T] destination")
     print()
     print("positional arguments: ")
     print("  destination target host address")
