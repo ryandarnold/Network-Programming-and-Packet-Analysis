@@ -2,7 +2,7 @@
 
 Implementation of Linux networking utilities "route" and "ifconfig" in Python
 
-##Reimplementation of the 'route' command using the "sys" library
+## Reimplementation of the 'route' command using the "sys" library
 
 Example output: 
 
@@ -12,7 +12,7 @@ default           172.17.0.1        0.0.0.0           UG       0        0       
 172.17.0.0        0.0.0.0           255.255.0.0       U        0        0        0       eth0 
 
 
-##Reimplementation of the 'ifconfig' command using the "psutil" and "netifaces" libraries
+## Reimplementation of the 'ifconfig' command using the "psutil" and "netifaces" libraries
 
 Example output: 
 
