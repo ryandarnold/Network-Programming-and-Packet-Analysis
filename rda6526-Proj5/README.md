@@ -62,4 +62,75 @@ Process finished with exit code 0
 
 ## Traceroute
 
-hi
+A Linux-based traceroute implementation built from scratch in Python using raw ICMP sockets.
+
+## Features
+
+- Raw ICMP socket implementation
+- Number of ICMP echo request packets to send per hop (`-q`)
+- Output addresses numerically instead of numerically and with hostname (`-n`)
+- Prints a summary of how many probes were not answered for each hop (`-S`)
+
+- Timeout handling for non-responsive routers (`* * *` behavior)
+
+## How It Works
+
+Traceroute works by sending packets to the destination with progressively increasing TTL values.
+
+- TTL = 1 → packet expires at the first router  
+- TTL = 2 → packet expires at the second router  
+- This process repeats until the destination host is reached
+
+## Usage
+
+Run with root privileges:
+
+```bash
+sudo python3 main.py <destination> [arguments]
+```
+
+### Examples
+
+Basic traceroute:
+
+```bash
+sudo python3 main.py google.com
+```
+
+## Example Output
+
+```text
+Traceroute to www.google.com (142.251.153.119), 30 hops max, 64 byte packets
+1   _gateway ([my-personal-IP-address]) 52.789ms 35.649ms 40.040ms 
+2   107.243.2.12 (107.243.2.12) 119.742ms * 71.721ms 
+3   * * * 
+4   * * * 
+5   * * * 
+6   * * * 
+7   * * * 
+8   * * * 
+9   * * * 
+10   142.251.153.119 (142.251.153.119) 403.844ms 248.870ms 210.686ms 
+```
+
+### Other use cases
+
+Set probe count:
+
+```bash
+sudo python3 main.py google.com -q 5
+```
+
+Print numeric IP addresses only:
+
+```bash
+sudo python3 main.py google.com -n
+```
+
+Print unanswered probe summary:
+
+```bash
+sudo python3 main.py google.com -S
+```
+
+
