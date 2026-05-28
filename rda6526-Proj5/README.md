@@ -97,7 +97,7 @@ Basic traceroute:
 sudo python3 main.py google.com
 ```
 
-## Example Output
+### Example Output
 
 ```text
 Traceroute to www.google.com (142.251.153.119), 30 hops max, 64 byte packets
@@ -113,7 +113,7 @@ Traceroute to www.google.com (142.251.153.119), 30 hops max, 64 byte packets
 10   142.251.153.119 (142.251.153.119) 403.844ms 248.870ms 210.686ms 
 ```
 
-### Other use cases
+## Other use cases
 
 Set probe count:
 
