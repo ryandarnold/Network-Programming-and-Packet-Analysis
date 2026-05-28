@@ -94,7 +94,7 @@ sudo python3 main.py <destination> [arguments]
 Basic traceroute:
 
 ```bash
-sudo python3 main.py google.com
+sudo python3 main.py www.google.com
 ```
 
 ### Example Output
@@ -118,19 +118,19 @@ Traceroute to www.google.com (142.251.153.119), 30 hops max, 64 byte packets
 Set probe count:
 
 ```bash
-sudo python3 main.py google.com -q 5
+sudo python3 main.py www.google.com -q 5
 ```
 
 Print numeric IP addresses only:
 
 ```bash
-sudo python3 main.py google.com -n
+sudo python3 main.py www.google.com -n
 ```
 
 Print unanswered probe summary:
 
 ```bash
-sudo python3 main.py google.com -S
+sudo python3 main.py www.google.com -S
 ```
 
 
