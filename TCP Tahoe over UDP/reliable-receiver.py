@@ -23,15 +23,20 @@ class Reliable_Receiver:
         self.ordered_packet_list = []  # ordering entire packet, not their seq # and data separately
 
     def create_sockets(self):
-        hostname = socket.gethostname()
-        this_computers_IP_Addr = socket.gethostbyname(hostname)  # default IP dest is this same machine
-        print("This computer's IP: " + str(this_computers_IP_Addr))
-        #receiving_port_num = self.receiving_port_num
-        self.receive_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # UDP
-        self.receive_socket.bind((this_computers_IP_Addr, int(self.receiving_port_num)))
+        # hostname = socket.gethostname()
+        # this_computers_IP_Addr = socket.gethostbyname(hostname)  # default IP dest is this same machine
+        # print("This computer's IP: " + str(this_computers_IP_Addr))
+        # print()
+        # #receiving_port_num = self.receiving_port_num
+        # self.receive_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # UDP
+        # self.receive_socket.bind((this_computers_IP_Addr, int(self.receiving_port_num)))
+
+        self.receive_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.receive_socket.bind(("0.0.0.0", int(self.receiving_port_num)))
+        print("Listening on all interfaces")
+
 
         self.transmit_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # UDP datagram
-        #return transmit_socket, receive_socket
 
     def send_packet_receiver(self, seq_num: int, total_seq_cnt: int, ack_num: int, data_payload: str):
         # order of data header: [curr-sequence number][total seq count][acknowledgement number][checksum][data]
@@ -40,6 +45,11 @@ class Reliable_Receiver:
         data_to_send_str = str(seq_num)+"@"+str(total_seq_cnt)+"@"+str(ack_num)+"@"+str(checksum)+"@"+data_payload
         data_to_send_in_bytes = pickle.dumps(data_to_send_str)
         print("sending ack to transmitter: " + str(ack_num))
+        print(
+            f"sending ack to "
+            f"{self.IP_dest}:"
+            f"{self.sending_port_num}"
+        )
         self.transmit_socket.sendto(data_to_send_in_bytes, (self.IP_dest, int(self.sending_port_num)))
 
     def find_checksum(self, seq_num: int, total_seq_cnt: int, sending_ack_num: int, data_to_send: str):
@@ -131,6 +141,7 @@ class Reliable_Receiver:
         if len(self.ordered_packet_list) > 0:
             if int(self.ordered_packet_list[0][0]) != 0:
                 # check if very first packet is missing
+                print("first packet with name of file is missing")
                 ack_to_send = 0  # sending 0 because receiver needs next packet with seq_num = 0
                 return ack_to_send
             else:  # you have the very first packet correct
@@ -165,7 +176,7 @@ class Reliable_Receiver:
         # order of data header: [curr-sequence number][total seq count][acknowledgement number][checksum][data]
         # note: the 0th index of the data is the file name
         name_of_file = self.ordered_packet_list[0][4]
-        new_name = "69420 " + name_of_file # simply for testing on a single computer
+        new_name = name_of_file
         # for x in range(1, len(self.ordered_packet_list)):
         #     print("huh" + self.ordered_packet_list[x][4])
         #print("got to write_received_data")
@@ -197,7 +208,7 @@ class Reliable_Receiver:
         pass
 
     def receive_packet(self) -> list:
-        #basically just receives a single packet from receiver and returns the unpickled data
+        #just receives a single packet from transmitter and returns the unpickled data
         # order of data header: [curr-sequence number][total seq count][acknowledgement number][checksum?][data]
         data, addr = self.receive_socket.recvfrom(1024)  # buffer size is 1024 bytes
         unpickled_data = str(pickle.loads(data)).split("@")
@@ -218,13 +229,14 @@ class Reliable_Receiver:
                         #got a SYN packet from transmitter
                         print("got a SYN packet from transmitter!")
                         state = 1
-                        #NOTE@@@@@: need to send a packet to the transmitter here!!!!!!!!!!!!!!!@@@@@@@@
                         self.send_packet_receiver(-5, -5,-5, "SYN" )
                         self.receive_socket.settimeout(1) #needs to be lower than the transmit timeout
+                elif correct_chksum == False:
+                    print("received incorrect checksum from transmitter!")
             elif state == 1:
                 try:
                     received_data = self.receive_packet()
-                    # if you got here, then you received some data from transmitter
+                    # if you got here, then you received some data from transmitter (hopefully its ACK packet)
                     correct_chksum = self.received_good_checksum(received_data)
                     if correct_chksum == True:
                         data = received_data[4]
@@ -234,7 +246,7 @@ class Reliable_Receiver:
                 except TimeoutError:
                     #time to resend the SYN packet
                     self.send_packet_receiver(-5, -5, -5, "SYN")
-                    print("had to resend the SYN packet rip")
+                    print("had to resend the SYN packet")
 
     def testing_dup_ack_on_transmitter(self):
         return 5
@@ -261,9 +273,7 @@ class Reliable_Receiver:
     def read_and_return_created_file(name_of_file_to_read_and_send):
         with open(name_of_file_to_read_and_send) as file:
             raw_list = list(file)
-        # print(raw_list)
         raw_list.insert(0, name_of_file_to_read_and_send)
-        # print("data to send to receiver: " + str(raw_list))
         return raw_list
 
     def compress_to_512_packets_size(raw_data_list) -> list:
@@ -293,7 +303,6 @@ class Reliable_Receiver:
         return compressed_list
 
     def send_to_dest(self, name_of_file: str):
-
 
         raw_data_array = self.read_and_return_created_file(name_of_file)
         data_to_send = self.compress_to_512_packets_size(raw_data_array)
@@ -375,6 +384,7 @@ class Reliable_Receiver:
         self.create_sockets()
         self.connect_to_client()
         print("connected to client!")
+        print()
         self.receive_socket.settimeout(None)
 
         received_data_list = self.receive_packet() #transmitter will send the directions for receiving/putting data
@@ -383,7 +393,7 @@ class Reliable_Receiver:
             name_of_file = received_data_list[4]
             self.send_to_dest(name_of_file)
         elif received_data_list[4] == "put":
-            testing_var = 0
+            testvar = False
             while True:
                 # order of data header: [curr-sequence number][total seq count][acknowledgement number][checksum][data]
                 # data, addr = self.receive_socket.recvfrom(1024)  # buffer size is 1024 bytes
@@ -391,6 +401,13 @@ class Reliable_Receiver:
                 received_data_list = self.receive_packet()
                 total_seq_count = int(received_data_list[1])
                 curr_seq_num = int(received_data_list[0])
+
+                if testvar == False:
+                    testvar = True
+                    print("UWUWUWUWUWUWUUW")
+                    print("received data list: " + str(received_data_list))
+                    print("total seq count = " + str(total_seq_count))
+                    print("curr_seq_num = " + str(curr_seq_num))
 
                 correct_chksum = self.received_good_checksum(received_data_list)
                 if correct_chksum == True:
@@ -425,6 +442,7 @@ def parse_args():
 
 
 def main():
+
     arg_dict = parse_args()
     dest_ip = arg_dict["-dest"]
     sending_port_num = arg_dict["-sending_port"]
