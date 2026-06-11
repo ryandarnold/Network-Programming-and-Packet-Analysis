@@ -52,7 +52,6 @@ class Reliable_Transmitter:
         # and then performing a bit-wise ones complement on that integer". then
         # you take the 16 LSBs and these 16 LSBs are the checksum
 
-        # So i'm just gonna do what it says for the TCP header checksum
         concatenation = str(seq_num) + str(total_seq_count) + str(ack_num) + data_payload
         bytes_string = bytes(concatenation, 'utf-8')
         byte_list = list(bytes_string)
@@ -72,7 +71,7 @@ class Reliable_Transmitter:
         return last_two_bytes
 
     def send_packet_transmitter(self, seq_num: int, total_seq_cnt: int, data_payload: str):
-        # all this method should do is send a single packet with a single payload
+        # this method sends a single packet with a single payload
         # and appends the sequence number, ack number, checksum, and data together and then sends it
         # data_to_send_in_bytes = data_payload.encode('utf-8')
         # order of data header: [curr-sequence number][total seq count][acknowledgement number][checksum?][data]
@@ -80,29 +79,37 @@ class Reliable_Transmitter:
         # need a copy of beginning sequence number in case acknowledgements fail from receiver
         # start_sequence_number = self.sequence_num
         ack_num = 0 #transmitter doesn't need to send ack so its hardcoded to zero
-        chksum = self.find_checksum(seq_num, total_seq_cnt, ack_num, data_payload) #correct!
-        #chksum = -63
-        #print("chksum from Transmitter: " + str(chksum))
+        chksum = self.find_checksum(seq_num, total_seq_cnt, ack_num, data_payload)
         data_to_send_str = str(seq_num) + "@" + str(total_seq_cnt) + "@" + str(ack_num) + "@" + str(chksum) + "@" + data_payload
         data_to_send_in_bytes = pickle.dumps(data_to_send_str)
         self.transmit_socket.sendto(data_to_send_in_bytes, (self.IP_dest, int(self.sending_port_num)))
+        print(
+            f"Sending to "
+            f"{self.IP_dest}:"
+            f"{self.sending_port_num}"
+        )
 
     def receive_packet(self) -> list:
         #basically just receives a single packet from receiver and returns the unpickled data
         # order of data header: [curr-sequence number][total seq count][acknowledgement number][checksum?][data]
         data, addr = self.receive_socket.recvfrom(1024)  # buffer size is 1024 bytes
+        print("received from:", addr)
         unpickled_data = str(pickle.loads(data)).split("@")
+
         return unpickled_data
 
 
     def create_sockets(self):
         #this just creates the two transmit and receive sockets and returns pointers to them
-        hostname = socket.gethostname()
-        IPAddr = socket.gethostbyname(hostname)  # default IP dest is this same machine
+        # hostname = socket.gethostname()
+        # IPAddr = socket.gethostbyname(hostname)  # default IP dest is this same machine
         self.transmit_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # UDP datagram
-        self.receive_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # UDP
-        self.receive_socket.bind((IPAddr, int(self.receiving_port_num)))
-        #return transmit_socket, receive_socket
+        # self.receive_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # UDP
+        # self.receive_socket.bind((IPAddr, int(self.receiving_port_num)))
+
+        self.receive_socket = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
+        self.receive_socket.bind(("0.0.0.0",int(self.receiving_port_num)))
+        print("Listening on all interfaces")
 
     def increase_window_size(self, data_to_send):
         # basically this attempts to increase window size by 2 for each received ack packet
@@ -148,10 +155,10 @@ class Reliable_Transmitter:
         received_verified_chksum = str(self.find_checksum(seq_num, total_seq_cnt, ack_num, data_str))
         chksum_from_packet = unpickled_data[3]
         if received_verified_chksum == chksum_from_packet:
-            #print("got correct checksum!!!!!!!@@@@@@@@@@@")
+            #print("got correct checksum!")
             return True
         else:
-            print("GOT INCORRECT CHECKSUM :( SAD FACE")
+            print("GOT INCORRECT CHECKSUM")
             return False
 
     def connect_to_server(self):
@@ -169,10 +176,11 @@ class Reliable_Transmitter:
                     if correct_chksum == True:
                         data = received_data[4]
                         if data == "SYN":
-                            state = 1 # receiver defintely received at least one SYN packet
+                            state = 1 # receiver definetly received at least one SYN packet
                             print("transmitter received SYN packet from receiver")
                 except TimeoutError:
                     #if timeout error, simply resend the SYN packet
+                    print("timeout - not receiving SYN packet from receiver")
                     pass
             elif state == 1:
                 self.send_packet_transmitter(-5, -5, "ACK")
@@ -184,7 +192,7 @@ class Reliable_Transmitter:
                         data = received_data[4]
                         if data == "SYN":
                             # if you received any data, then ACK packet was lost and need to resend ACK to receiver
-                            pass
+                            print("SYN packet from receiver not received, resending ACK packet")
                 except TimeoutError:
                     # if a timeout occured now, this means that the receiver received the "ACK"
                     # packet from this transmitter. Now need to go back to normal program
@@ -212,12 +220,13 @@ class Reliable_Transmitter:
 
     def slow_start(self, seq_num, total_seq_cnt, data) -> int:
         #this method sends one to two packets, and adjusts the cwnd size and its contents
-        #NOTE: THIS METHOD IS FOR SLOW START!!!!
-        if seq_num != total_seq_cnt:
+        print("slow start: seq_num: " + str(seq_num) + "")
+        if seq_num <= total_seq_cnt:
             if self.sent_first_packet == False:
                 #send the very first packet, so only send one
                 print("v-----------------v")
                 self.send_packet_transmitter(seq_num, total_seq_cnt, data[seq_num])  # correct!
+                print("sent out data[seq_num]: " + str(data[seq_num]))
                 self.sent_first_packet = True
                 self.cwnd_size = self.cwnd_size + 1
                 self.cwnd_list.append(seq_num)
@@ -308,9 +317,11 @@ class Reliable_Transmitter:
             seq_num = seq_num + 1
             self.send_packet_transmitter(seq_num,total_seq_cnt,data[seq_num])
             self.cwnd_list.append(seq_num)
+            self.cwnd_size = self.cwnd_size + 1 #TESTING
         else:
             self.send_packet_transmitter(seq_num, total_seq_cnt, data[seq_num])
             self.cwnd_list.append(seq_num)
+            self.cwnd_size = self.cwnd_size + 1 #TESTING
         return seq_num + 1
 
     def send_to_dest(self, user_command, data_to_send: list):
@@ -327,8 +338,8 @@ class Reliable_Transmitter:
 
         timeout_val = 1  # default timeout value is 1 and will be updated later
 
-        total_seq_count = self.find_total_seq_count(data_to_send)  # correct one!
-        print("total sequence count: " + "")
+        total_seq_count = self.find_total_seq_count(data_to_send)
+        print("total sequence count: " + str(total_seq_count))
         self.receive_socket.settimeout(timeout_val)
         #self.receive_socket.settimeout(None)
         curr_ack_from_receiver = 0  # initially 1 then gets updated in below while loop
@@ -337,8 +348,8 @@ class Reliable_Transmitter:
         sent_time = 0
         found_official_RTT_time = False
         ssthresh = 123456789 # some very large number to start with
-        seq_num_to_send = self.slow_start(seq_num_to_send, total_seq_count, data_to_send)
-        while curr_ack_from_receiver != total_seq_count + 1:  # send while you haven't received final ack from receiver
+        seq_num_to_send = self.slow_start(seq_num_to_send, total_seq_count, data_to_send) #sends the name of file
+        while curr_ack_from_receiver != (total_seq_count + 1):  # send while you haven't received final ack from receiver
             # below is for testing if ack from receiver works
             #print("timeout value: " + str(timeout_val))
             if seq_num_to_send < 3:
@@ -382,6 +393,7 @@ class Reliable_Transmitter:
 
 
                 elif correct_chksum == False:
+                    print("received incorrect checksum from receiver!")
                     raise TimeoutError #TCP times out if the received checksum is incorrect
             except TimeoutError:
                 #time to resend the previously sent packet (and later reduce the sending rate)
@@ -564,50 +576,45 @@ def parse_args():
     return argument_dictionary
 
 
-def create_file():
-    name_of_file = "File Name 1 - from Transmitter.txt"
-    file = open(name_of_file, "w")  # 'w' both creates new files and overwrites the same-named file
-    file.write("\n")  # /n makes next file.write go to next line
-    file.write("\n")
-    file.write("hehe \n")
-    file.write("\n")
-    file.write("blink-182 is pretty good :)")
-    file.write("\n")
-    # f.writelines(["Hello World ", "You are welcome to Fcc\n"])
-    file.close()
+# def create_file():
+#     name_of_file = "2nd_example_file_to_send.txt"
+#     file = open(name_of_file, "w")  # 'w' both creates new files and overwrites the same-named file
+#     file.write("\n")  # /n makes next file.write go to next line
+#     file.write("\n")
+#     file.write("hehe \n")
+#     file.write("\n")
+#     file.write("blink-182 is pretty good 6/2/2026")
+#     file.write("\n")
+#     # f.writelines(["Hello World ", "You are welcome to Fcc\n"])
+#     file.close()
 
 
 def read_and_return_created_file(name_of_file_to_read_and_send):
     with open(name_of_file_to_read_and_send) as file:
         raw_list = list(file)
-    #print(raw_list)
     raw_list.insert(0, name_of_file_to_read_and_send)
-    #print("data to send to receiver: " + str(raw_list))
     return raw_list
 
 def compress_to_512_packets_size(raw_data_list) -> list:
     print("incoming raw data list: " + str(raw_data_list))
-    # title_of_file = raw_data_list[0]
-    # print("title of file from compress to 512 packet method: " + str(title_of_file))
     one_huge_string = ""
     for x in range(1, len(raw_data_list)):
         #appending all data into one string so its easier to split into 512 bytes
         one_huge_string = one_huge_string + raw_data_list[x]
-    #one_huge_bytes =
-    #length_hehe = len(one_huge_string[512:1024])
-    compressed_list = [raw_data_list[0]]
+    compressed_list = [raw_data_list[0]] #first item is name of file
+    # print("TEMP: " + str(type(compressed_list[0]))) #type: string
     low_pointer = 0 # used for splitting data into 512 chunks
     high_index = 512 # used for splitting data into 512 chunks
     current_idx_to_print = 1
     #print("length one_huge_string = " + str(len(one_huge_string[low_pointer:high_index])))
     while len(one_huge_string[low_pointer:]) > 512: #while rest of data is more than 512 bytes
         compressed_list.append(one_huge_string[low_pointer: high_index])
-        print("length of stored 512 chunk: " + str(len(compressed_list[current_idx_to_print])))
-        current_idx_to_print = current_idx_to_print + 1
+        # print("length of stored 512 chunk: " + str(len(compressed_list[current_idx_to_print])))
+        # current_idx_to_print = current_idx_to_print + 1
         low_pointer = high_index
         high_index = high_index + 512 # increase high pointer by the 512 chunk
     compressed_list.append(one_huge_string[low_pointer:])
-    print("length of final 512 chunk: " + str(len(compressed_list[current_idx_to_print])))
+    # print("length of final 512 chunk: " + str(len(compressed_list[current_idx_to_print])))
     #print("length of stored 512 chunk: " + str(len(compressed_list[current_idx_to_print])))
     return compressed_list
 
@@ -619,8 +626,7 @@ def test_reliable_transmitter(transmitter_obj, user_command, name_of_file):
     #name_of_file = "File Name 1 - from Transmitter.txt"
     raw_data_array = read_and_return_created_file(name_of_file)
     compressed_data_array = compress_to_512_packets_size(raw_data_array)
-    transmitter_obj.send_to_dest(user_command, compressed_data_array)  # this will eventually send a file
-    # need to make another method HERE to receive a file from receiver
+    transmitter_obj.send_to_dest(user_command, compressed_data_array)  # this sends a file
 
 
 def find_user_inputs():
@@ -690,7 +696,7 @@ def main():
             print("You already connected to the server!")
         elif (user_command == "put") and (connected_to_server == True):
             test_reliable_transmitter(transmitter_obj, user_command, file_name)
-            # basically end program
+            # end program
             return
         elif (user_command == "get") and (connected_to_server == True):
             transmitter_obj.receive_from_dest(file_name)
@@ -698,9 +704,6 @@ def main():
             return
 
         user_command, file_name = find_user_inputs()
-
-
-
 
 
 
