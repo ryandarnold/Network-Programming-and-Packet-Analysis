@@ -58,40 +58,77 @@ a. Prints up to [Max-Packet-Count] number of packets from the .pcap file
 ##Example output: 
 
 packet number 349:
+
 ETHER:  ----- Ether Header -----
+
 ETHER: 
+
 ETHER: Packet size = 75 bytes
+
 ETHER: Destination = 01:00:5e:00:00:fc
+
 ETHER: Source = cc:f9:e4:e8:bc:af
+
 ETHER: Ethertype = 0800 (IP)
+
 ETHER: 
+
+
 IP:  ----- IP Header -----
+
 IP: 
+
 IP: Version = 4
+
 IP: Header length = 20 bytes
+
 IP: Type of service = 0x00
+
 IP:    xxx. .... = 0 (precedence)
+
 IP:    ...0 .... = normal delay
+
 IP:    .... 0... = normal throughput
+
 IP:    .... .0.. = normal reliability
+
 IP: Total length = 61 bytes
+
 IP: Identification = 34827
+
 IP: Flags = 0x0
+
 IP:    .0.. .... = can fragment
+
 IP:    ..0. .... = last fragment
+
 IP: Fragment offset = 0 bytes
+
 IP: Time to live = 1 seconds/hops
+
 IP: Protocol = 17 (UDP)
+
 IP: Header checksum = 0x5117
+
 IP: Source address = 129.21.126.124, (hostname unknown)
+
 IP: Destination address = 224.0.0.252, (hostname unknown)
+
 IP: No options
+
 IP: 
+
+
 UDP: ----- UDP Header -----
+
 UDP: Source port = 65227
+
 UDP: Destination port = 5355
+
 UDP: Length = 41
+
 UDP: Checksum = 0xb4ea
+
 
 
 
