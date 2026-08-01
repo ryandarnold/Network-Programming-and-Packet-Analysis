@@ -2,6 +2,8 @@
 
 ##**Example outpu**t: 
 
+-----------------------------------------------------------------------------------------------------------
+
 packet number 349:
 
 ETHER:  ----- Ether Header -----
@@ -73,6 +75,8 @@ UDP: Destination port = 5355
 UDP: Length = 41
 
 UDP: Checksum = 0xb4ea
+
+-----------------------------------------------------------------------------------------------------------
 
 
 A command-line network packet analysis tool for inspecting and filtering packet capture (`.pcap`) files.
